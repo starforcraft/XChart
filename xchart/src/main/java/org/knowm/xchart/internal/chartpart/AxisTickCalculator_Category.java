@@ -1,7 +1,7 @@
 package org.knowm.xchart.internal.chartpart;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -87,10 +87,9 @@ class AxisTickCalculator_Category extends AxisTickCalculator_ {
       if (styler.getDatePattern() == null) {
         throw new RuntimeException("You need to set the Date Formatting Pattern!!!");
       }
-      SimpleDateFormat simpleDateformat =
-          new SimpleDateFormat(styler.getDatePattern(), styler.getLocale());
-      simpleDateformat.setTimeZone(styler.getTimezone());
-      axisFormat = simpleDateformat;
+      DateTimeFormatter formatter =
+          DateTimeFormatter.ofPattern(styler.getDatePattern(), styler.getLocale());
+      axisFormat = formatter.toFormat();
     }
 
     int counter = 0;

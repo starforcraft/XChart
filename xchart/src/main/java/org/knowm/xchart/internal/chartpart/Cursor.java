@@ -1,8 +1,6 @@
 package org.knowm.xchart.internal.chartpart;
 
-import java.awt.BasicStroke;
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
@@ -11,10 +9,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 import org.knowm.xchart.internal.series.MarkerSeries;
 import org.knowm.xchart.internal.series.Series;
 import org.knowm.xchart.style.XYStyler;
@@ -136,25 +133,31 @@ public class Cursor extends MouseAdapter implements ChartPart {
 
   private void paintBackGround(Graphics2D g, TextLayout xValueTextLayout) {
 
+    boolean isZero =
+        matchingDataPointList.size() == 1
+            && matchingDataPointList.get(0).yValue.equals(styler.getCursorZeroString());
     double maxLinewidth = xValueTextLayout.getBounds().getWidth();
     TextLayout dataPointTextLayout = null;
     Rectangle2D dataPointRectangle = null;
-    for (DataPoint dataPoint : matchingDataPointList) {
-      dataPointTextLayout =
-          new TextLayout(
-              dataPoint.seriesName + ": " + dataPoint.yValue,
-              styler.getCursorFont(),
-              new FontRenderContext(null, true, false));
-      dataPointRectangle = dataPointTextLayout.getBounds();
-      if (maxLinewidth < dataPointRectangle.getWidth()) {
-        maxLinewidth = dataPointRectangle.getWidth();
+    if (!isZero) {
+      for (DataPoint dataPoint : matchingDataPointList) {
+        dataPointTextLayout =
+            new TextLayout(
+                dataPoint.seriesName + ": " + dataPoint.yValue,
+                styler.getCursorFont(),
+                new FontRenderContext(null, true, false));
+        dataPointRectangle = dataPointTextLayout.getBounds();
+        if (maxLinewidth < dataPointRectangle.getWidth()) {
+          maxLinewidth = dataPointRectangle.getWidth();
+        }
       }
     }
 
-    double backgroundWidth = styler.getCursorFont().getSize() + maxLinewidth + 3 * LINE_SPACING;
+    double backgroundWidth =
+        styler.getCursorFont().getSize() + maxLinewidth + (!isZero ? 3 * LINE_SPACING : 0);
     double backgroundHeight =
-        textHeight * (1 + matchingDataPointList.size())
-            + (2 + matchingDataPointList.size()) * LINE_SPACING;
+        textHeight * (1 + (!isZero ? matchingDataPointList.size() : 0))
+            + (2 + (!isZero ? matchingDataPointList.size() : 0)) * LINE_SPACING;
 
     startX = mouseX;
     startY = mouseY;
@@ -246,20 +249,62 @@ public class Cursor extends MouseAdapter implements ChartPart {
     }
 
     if (dataPoints.size() > 0) {
-      Map<String, DataPoint> map = new HashMap<>();
-      String seriesName = "";
-      for (DataPoint dataPoint : dataPoints) {
-        seriesName = dataPoint.seriesName;
-        if (map.containsKey(seriesName)) {
-          if (Math.abs(dataPoint.x - mouseX) < Math.abs(map.get(seriesName).x - mouseX)) {
-            map.put(seriesName, dataPoint);
+      String cursorZeroString = styler.getCursorZeroString();
+      boolean fullNotZero = cursorZeroString != null;
+      if (fullNotZero) {
+        for (DataPoint dataPoint : dataPoints) {
+          if (!dataPoint.yValue.equals(cursorZeroString)) {
+            fullNotZero = false;
+            break;
           }
-        } else {
-          map.put(seriesName, dataPoint);
         }
       }
-      matchingDataPointList.clear();
-      matchingDataPointList.addAll(map.values());
+
+      if (!fullNotZero) {
+        LinkedHashMap<String, DataPoint> map = new LinkedHashMap<>();
+        String seriesName = "";
+        for (DataPoint dataPoint : dataPoints) {
+          seriesName = dataPoint.seriesName;
+          if (dataPoint.yValue.equals(cursorZeroString)) {
+            continue;
+          }
+          if (map.containsKey(seriesName)) {
+            if (Math.abs(dataPoint.x - mouseX) < Math.abs(map.get(seriesName).x - mouseX)) {
+              map.put(seriesName, dataPoint);
+            }
+          } else {
+            map.put(seriesName, dataPoint);
+          }
+        }
+
+        // Order map
+        if (styler.getCursorOrder() != null) {
+          map =
+              map.entrySet().stream()
+                  .sorted(
+                      Map.Entry.comparingByValue(
+                          Comparator.comparing(DataPoint::getYValue, styler.getCursorOrder())
+                              .reversed()))
+                  .collect(
+                      Collectors.toMap(
+                          Map.Entry::getKey,
+                          Map.Entry::getValue,
+                          (e1, e2) -> e1,
+                          LinkedHashMap::new));
+        }
+
+        matchingDataPointList.clear();
+        matchingDataPointList.addAll(map.values());
+      } else {
+        matchingDataPointList.clear();
+        matchingDataPointList.add(
+            new DataPoint(
+                dataPoints.get(0).x,
+                -1,
+                dataPoints.get(0).xValue,
+                styler.getCursorZeroString(),
+                null));
+      }
     }
   }
 
@@ -289,6 +334,10 @@ public class Cursor extends MouseAdapter implements ChartPart {
       this.xValue = xValue;
       this.yValue = yValue;
       this.seriesName = seriesName;
+    }
+
+    public String getYValue() {
+      return yValue;
     }
   }
 }

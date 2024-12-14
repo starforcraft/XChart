@@ -117,6 +117,7 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
     //    g.draw(getBounds());
 
     // get total
+    // TODO: Combine small slices into one called "other"
     double total = 0.0;
 
     Map<String, S> map = chart.getSeriesMap();
@@ -246,7 +247,6 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
   }
 
   private void paintLabels(Graphics2D g, Rectangle2D pieBounds, double total, double startAngle) {
-
     Map<String, S> map = chart.getSeriesMap();
     for (S series : map.values()) {
 
@@ -257,7 +257,7 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
       Number y = series.getValue();
 
       // draw slice/donut
-      double arcAngle = (y.doubleValue() * 360 / total);
+      double arcAngle = y.doubleValue() * 360 / total;
       // CLOCKWISE, startAngle minus arcAngle
       if (ClockwiseDirectionType.CLOCKWISE == pieStyler.getClockwiseDirectionType()) {
         startAngle -= arcAngle;
@@ -347,13 +347,18 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
         // double max = Math.max(xDiff, yDiff);
         // System.out.println(" ================== ");
         boolean labelWillFit = false;
-        if (xDiff >= yDiff) { // assume more vertically orientated slice
-          if (labelWidth < xDiff) {
-            labelWillFit = true;
-          }
-        } else if (xDiff <= yDiff) { // assume more horizontally orientated slice
-          if (labelHeight < yDiff) {
-            labelWillFit = true;
+        double slicePercentage = y.doubleValue() / total;
+        if (slicePercentage > 0.10) {
+          labelWillFit = true;
+        } else {
+          if (xDiff >= yDiff) { // Assume more vertically oriented slice
+            if (labelWidth < xDiff) {
+              labelWillFit = true;
+            }
+          } else if (xDiff <= yDiff) { // Assume more horizontally oriented slice
+            if (labelHeight < yDiff) {
+              labelWillFit = true;
+            }
           }
         }
 

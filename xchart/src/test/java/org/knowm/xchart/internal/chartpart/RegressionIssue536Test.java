@@ -78,7 +78,7 @@ public class RegressionIssue536Test {
     List<String> tickLabels = chart.axisPair.getXAxis().getAxisTickCalculator().getTickLabels();
 
     assertThat(tickLabels.size()).isEqualTo(13);
-    assertThat(tickLabels.get(0)).isEqualTo("10-18");
+    assertThat(tickLabels.get(0)).isEqualTo("18.10");
     boolean areAllLabelsUnique =
         ((AxisTickCalculator_Date) chart.axisPair.getXAxis().getAxisTickCalculator())
             .areAllTickLabelsUnique(tickLabels);

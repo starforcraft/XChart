@@ -60,18 +60,19 @@ class AxisTickCalculator_Date extends AxisTickCalculator_ {
     timeSpans.add(new TimeSpan(DAY_SCALE, 1, "EEE HH:mm"));
     timeSpans.add(new TimeSpan(DAY_SCALE, 2, "EEE HH:mm"));
     timeSpans.add(new TimeSpan(DAY_SCALE, 3, "EEE HH:mm"));
-    timeSpans.add(new TimeSpan(DAY_SCALE, 5, "MM-dd"));
-    timeSpans.add(new TimeSpan(DAY_SCALE, 10, "MM-dd"));
-    timeSpans.add(new TimeSpan(DAY_SCALE, 15, "MM-dd"));
+    timeSpans.add(new TimeSpan(DAY_SCALE, 5, "dd.MM"));
+    timeSpans.add(new TimeSpan(DAY_SCALE, 10, "dd.MM"));
+    timeSpans.add(new TimeSpan(DAY_SCALE, 15, "dd.MM"));
 
-    timeSpans.add(new TimeSpan(MONTH_SCALE, 1, "MM-dd"));
-    timeSpans.add(new TimeSpan(MONTH_SCALE, 2, "MM-dd"));
-    timeSpans.add(new TimeSpan(MONTH_SCALE, 3, "MM-dd"));
-    timeSpans.add(new TimeSpan(MONTH_SCALE, 4, "MM-dd"));
-    timeSpans.add(new TimeSpan(MONTH_SCALE, 6, "yyyy-MM"));
+    // TODO: Implement localization
+    timeSpans.add(new TimeSpan(MONTH_SCALE, 1, "dd.MM"));
+    timeSpans.add(new TimeSpan(MONTH_SCALE, 2, "dd.MM"));
+    timeSpans.add(new TimeSpan(MONTH_SCALE, 3, "dd.MM"));
+    timeSpans.add(new TimeSpan(MONTH_SCALE, 4, "dd.MM"));
+    timeSpans.add(new TimeSpan(MONTH_SCALE, 6, "MM.yyyy"));
 
-    timeSpans.add(new TimeSpan(YEAR_SCALE, 1, "yyyy-MM"));
-    timeSpans.add(new TimeSpan(YEAR_SCALE, 2, "yyyy-MM"));
+    timeSpans.add(new TimeSpan(YEAR_SCALE, 1, "MM.yyyy"));
+    timeSpans.add(new TimeSpan(YEAR_SCALE, 2, "MM.yyyy"));
     timeSpans.add(new TimeSpan(YEAR_SCALE, 5, "yyyy"));
     timeSpans.add(new TimeSpan(YEAR_SCALE, 10, "yyyy"));
     timeSpans.add(new TimeSpan(YEAR_SCALE, 20, "yyyy"));

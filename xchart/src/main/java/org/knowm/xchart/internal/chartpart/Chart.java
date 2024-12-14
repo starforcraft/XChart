@@ -91,6 +91,10 @@ public abstract class Chart<ST extends Styler, S extends Series> {
     return seriesMap.remove(seriesName);
   }
 
+  public void clearSeries() {
+    seriesMap.clear();
+  }
+
   /** Getters and Setters */
   public int getWidth() {
 

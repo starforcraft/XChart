@@ -2,6 +2,7 @@ package org.knowm.xchart.style;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.Comparator;
 import java.util.function.Function;
 import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
 import org.knowm.xchart.style.colors.ChartColor;
@@ -27,6 +28,8 @@ public class XYStyler extends AxesChartStyler {
   private Color cursorBackgroundColor;
   private Function<Double, String> customCursorXDataFormattingFunction;
   private Function<Double, String> customCursorYDataFormattingFunction;
+  private String cursorZeroString;
+  private Comparator<String> cursorOrder;
 
   /** Constructor */
   public XYStyler() {
@@ -223,5 +226,23 @@ public class XYStyler extends AxesChartStyler {
       Function<Double, String> customCursorYDataFormattingFunction) {
     this.customCursorYDataFormattingFunction = customCursorYDataFormattingFunction;
     return this;
+  }
+
+  public XYStyler setCursorOrder(Comparator<String> cursorOrder) {
+    this.cursorOrder = cursorOrder;
+    return this;
+  }
+
+  public Comparator<String> getCursorOrder() {
+    return cursorOrder;
+  }
+
+  public XYStyler setCursorZeroString(String cursorZeroString) {
+    this.cursorZeroString = cursorZeroString;
+    return this;
+  }
+
+  public String getCursorZeroString() {
+    return cursorZeroString;
   }
 }

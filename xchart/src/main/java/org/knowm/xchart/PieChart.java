@@ -85,6 +85,10 @@ public class PieChart extends Chart<PieStyler, PieSeries> {
     return series;
   }
 
+  public int getSeriesAmount() {
+    return seriesMap.size();
+  }
+
   /**
    * Update a series by updating the pie slide value
    *
