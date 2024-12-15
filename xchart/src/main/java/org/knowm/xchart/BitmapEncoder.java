@@ -81,7 +81,7 @@ public final class BitmapEncoder {
   public static <T extends Chart<?, ?>> void saveBitmap(
       T chart, OutputStream targetStream, BitmapFormat bitmapFormat) throws IOException {
 
-    BufferedImage bufferedImage = getBufferedImage(chart);
+    BufferedImage bufferedImage = getBufferedImage(chart, bitmapFormat == BitmapFormat.PNG);
     ImageIO.write(bufferedImage, bitmapFormat.toString().toLowerCase(), targetStream);
   }
 
@@ -273,9 +273,13 @@ public final class BitmapEncoder {
   }
 
   public static <T extends Chart<?, ?>> BufferedImage getBufferedImage(T chart) {
+    return getBufferedImage(chart, false);
+  }
+
+  public static <T extends Chart<?, ?>> BufferedImage getBufferedImage(T chart, boolean isTranslucent) {
 
     BufferedImage bufferedImage =
-        new BufferedImage(chart.getWidth(), chart.getHeight(), BufferedImage.TYPE_INT_RGB);
+        new BufferedImage(chart.getWidth(), chart.getHeight(), isTranslucent ? BufferedImage.TRANSLUCENT : BufferedImage.TYPE_INT_RGB);
     Graphics2D graphics2D = bufferedImage.createGraphics();
     chart.paint(graphics2D, chart.getWidth(), chart.getHeight());
     return bufferedImage;
