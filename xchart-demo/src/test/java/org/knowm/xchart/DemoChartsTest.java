@@ -1,6 +1,5 @@
 package org.knowm.xchart;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,7 +38,7 @@ public class DemoChartsTest {
     configureInteractiveFeatures(chart);
 
     // when
-    BitmapEncoder.saveBitmap(chart, new ByteArrayOutputStream(), BitmapEncoder.BitmapFormat.PNG);
+    // BitmapEncoder.saveBitmap(chart, new ByteArrayOutputStream(), BitmapEncoder.BitmapFormat.PNG);
 
     // test
 

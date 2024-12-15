@@ -13,10 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.print.PageFormat;
-import java.awt.print.Paper;
 import java.awt.print.Printable;
-import java.awt.print.PrinterException;
-import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.AbstractAction;
@@ -49,7 +46,6 @@ public class XChartPanel<T extends Chart<?, ?>> extends JPanel {
   private final Dimension preferredSize;
   private String saveAsString = "Save As...";
   private String exportAsString = "Export To...";
-  private String printString = "Print...";
   private String resetString = "Reset Zoom";
   private ToolTips toolTips = null;
 
@@ -79,13 +75,6 @@ public class XChartPanel<T extends Chart<?, ?>> extends JPanel {
             KeyEvent.VK_E, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
     this.getInputMap(WHEN_IN_FOCUSED_WINDOW).put(ctrlE, "export");
     this.getActionMap().put("export", new ExportAction());
-
-    // Control+P key listener for printing chart
-    KeyStroke ctrlP =
-        KeyStroke.getKeyStroke(
-            KeyEvent.VK_P, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx());
-    this.getInputMap(WHEN_IN_FOCUSED_WINDOW).put(ctrlP, "print");
-    this.getActionMap().put("print", new PrintAction());
 
     // Mouse Listener for Zoom. Only available for XYCharts
     if (chart instanceof XYChart && ((XYStyler) chart.getStyler()).isZoomEnabled()) {
@@ -140,16 +129,6 @@ public class XChartPanel<T extends Chart<?, ?>> extends JPanel {
   }
 
   /**
-   * Set the "Print..." String if you want to localize it.
-   *
-   * @param printString
-   */
-  public void setPrintString(String printString) {
-
-    this.printString = printString;
-  }
-
-  /**
    * Set the "Reset" String if you want to localize it. This is on the button which resets the zoom
    * feature.
    *
@@ -179,34 +158,6 @@ public class XChartPanel<T extends Chart<?, ?>> extends JPanel {
   public Dimension getPreferredSize() {
 
     return preferredSize;
-  }
-
-  private void showPrintDialog() {
-
-    PrinterJob printJob = PrinterJob.getPrinterJob();
-    if (printJob.printDialog()) {
-      try {
-        // Page format
-        PageFormat pageFormat = printJob.defaultPage();
-        Paper paper = pageFormat.getPaper();
-        if (this.getWidth() > this.getHeight()) {
-          pageFormat.setOrientation(PageFormat.LANDSCAPE);
-          paper.setImageableArea(0, 0, pageFormat.getHeight(), pageFormat.getWidth());
-        } else {
-          paper.setImageableArea(0, 0, pageFormat.getWidth(), pageFormat.getHeight());
-        }
-        pageFormat.setPaper(paper);
-        pageFormat = printJob.validatePage(pageFormat);
-
-        String jobName = "XChart " + chart.getTitle().trim();
-        printJob.setJobName(jobName);
-
-        printJob.setPrintable(new Printer(this), pageFormat);
-        printJob.print();
-      } catch (PrinterException e) {
-        e.printStackTrace();
-      }
-    }
   }
 
   private void showSaveAsDialog() {
@@ -378,20 +329,6 @@ public class XChartPanel<T extends Chart<?, ?>> extends JPanel {
     }
   }
 
-  private class PrintAction extends AbstractAction {
-
-    public PrintAction() {
-
-      super("print");
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-      showPrintDialog();
-    }
-  }
-
   /**
    * File filter based on the suffix of a file. This file filter accepts all files that end with
    * .suffix or the capitalized suffix.
@@ -457,7 +394,6 @@ public class XChartPanel<T extends Chart<?, ?>> extends JPanel {
   private class XChartPanelPopupMenu extends JPopupMenu {
 
     final JMenuItem saveAsMenuItem;
-    final JMenuItem printMenuItem;
     JMenuItem exportAsMenuItem;
 
     public XChartPanelPopupMenu() {
@@ -485,30 +421,6 @@ public class XChartPanel<T extends Chart<?, ?>> extends JPanel {
             public void mouseClicked(MouseEvent e) {}
           });
       add(saveAsMenuItem);
-
-      printMenuItem = new JMenuItem(printString);
-      printMenuItem.addMouseListener(
-          new MouseListener() {
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-              showPrintDialog();
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {}
-
-            @Override
-            public void mouseExited(MouseEvent e) {}
-
-            @Override
-            public void mouseEntered(MouseEvent e) {}
-
-            @Override
-            public void mouseClicked(MouseEvent e) {}
-          });
-      add(printMenuItem);
 
       if (chart instanceof XYChart) {
         exportAsMenuItem = new JMenuItem(exportAsString);
