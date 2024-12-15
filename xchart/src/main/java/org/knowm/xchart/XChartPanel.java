@@ -86,7 +86,9 @@ public class XChartPanel<T extends Chart<?, ?>> extends JPanel {
 
     // Mouse motion listener for Cursor
     if (chart instanceof XYChart && ((XYStyler) chart.getStyler()).isCursorEnabled()) {
-      this.addMouseMotionListener(new Cursor(chart));
+      Cursor cursor = new Cursor(chart);
+      this.addMouseMotionListener(cursor);
+      this.addMouseWheelListener(cursor);
     }
 
     // Mouse motion listener for Tooltips
