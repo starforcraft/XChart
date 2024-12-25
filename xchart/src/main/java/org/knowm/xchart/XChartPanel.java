@@ -12,8 +12,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.print.PageFormat;
-import java.awt.print.Printable;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.AbstractAction;
@@ -449,31 +447,6 @@ public class XChartPanel<T extends Chart<?, ?>> extends JPanel {
             });
         add(exportAsMenuItem);
       }
-    }
-  }
-
-  public static class Printer implements Printable {
-    private final Component component;
-
-    Printer(Component c) {
-      component = c;
-    }
-
-    @Override
-    public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) {
-      if (pageIndex > 0) {
-        return NO_SUCH_PAGE;
-      }
-
-      Graphics2D g2 = (Graphics2D) graphics;
-      g2.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-      double sx = pageFormat.getImageableWidth() / component.getWidth();
-      double sy = pageFormat.getImageableHeight() / component.getHeight();
-      g2.scale(sx, sy);
-
-      component.printAll(g2);
-
-      return PAGE_EXISTS;
     }
   }
 }

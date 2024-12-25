@@ -7,6 +7,7 @@ import java.awt.geom.*;
 import java.awt.geom.Arc2D.Double;
 import java.text.DecimalFormat;
 import java.util.Map;
+import javax.swing.Icon;
 import org.knowm.xchart.PieSeries;
 import org.knowm.xchart.PieSeries.PieSeriesRenderStyle;
 import org.knowm.xchart.style.PieStyler;
@@ -17,7 +18,7 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
     extends PlotContent_<ST, S> {
 
   private final ST pieStyler;
-  private final DecimalFormat df = new DecimalFormat("#.0");
+  private final DecimalFormat df = new DecimalFormat("0.0");
 
   /**
    * Constructor
@@ -120,7 +121,7 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
     // TODO: Combine small slices into one called "other"
     double total = 0.0;
 
-    Map<String, S> map = chart.getSeriesMap();
+    Map<String, S> map = chart.getFilteredSeriesMap();
     for (S series : map.values()) {
 
       if (!series.isEnabled() || series.getValue() == null) {
@@ -131,16 +132,16 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
 
     // draw pie slices
     double startAngle = pieStyler.getStartAngleInDegrees() + 90;
-    paintSlices(g, pieBounds, total, startAngle);
-    paintLabels(g, pieBounds, total, startAngle);
+    paintSlices(g, pieBounds, total, startAngle, map);
+    paintLabels(g, pieBounds, total, startAngle, map);
     paintSum(g, pieBounds, total);
   }
 
-  private void paintSlices(Graphics2D g, Rectangle2D pieBounds, double total, double startAngle) {
+  private void paintSlices(
+      Graphics2D g, Rectangle2D pieBounds, double total, double startAngle, Map<String, S> map) {
 
     double borderAngle = startAngle;
 
-    Map<String, S> map = chart.getSeriesMap();
     double xCenter = pieBounds.getX() + pieBounds.getWidth() / 2;
     double yCenter = pieBounds.getY() + pieBounds.getHeight() / 2;
     for (S series : map.values()) {
@@ -246,8 +247,8 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
     }
   }
 
-  private void paintLabels(Graphics2D g, Rectangle2D pieBounds, double total, double startAngle) {
-    Map<String, S> map = chart.getSeriesMap();
+  private void paintLabels(
+      Graphics2D g, Rectangle2D pieBounds, double total, double startAngle, Map<String, S> map) {
     for (S series : map.values()) {
 
       if (!series.isEnabled() || series.getValue() == null) {
@@ -268,6 +269,7 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
       if (pieStyler.isLabelsVisible()) {
 
         // draw label
+        boolean isOtherLabel = series.getName().equals("Other");
         String label = "";
         if (pieStyler.getLabelType() == LabelType.Value) {
 
@@ -348,14 +350,14 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
         // System.out.println(" ================== ");
         boolean labelWillFit = false;
         double slicePercentage = y.doubleValue() / total;
-        if (slicePercentage > 0.10) {
+        if (slicePercentage > 0.05) {
           labelWillFit = true;
         } else {
           if (xDiff >= yDiff) { // Assume more vertically oriented slice
             if (labelWidth < xDiff) {
               labelWillFit = true;
             }
-          } else if (xDiff <= yDiff) { // Assume more horizontally oriented slice
+          } else { // Assume more horizontally oriented slice
             if (labelHeight < yDiff) {
               labelWillFit = true;
             }
@@ -363,7 +365,9 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
         }
 
         // draw label
-        if (pieStyler.isForceAllLabelsVisible() || labelWillFit) {
+        if (pieStyler.isForceAllLabelsVisible()
+            || labelWillFit
+            || series.getName().equals("Other")) {
 
           if (pieStyler.isLabelsFontColorAutomaticEnabled()) {
             g.setColor(pieStyler.getLabelsFontColor(series.getFillColor()));
@@ -375,6 +379,7 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
           AffineTransform orig = g.getTransform();
           AffineTransform at = new AffineTransform();
 
+          double xOffsetOutside = 0;
           // inside
           if (pieStyler.getLabelsDistance() <= 1.0) {
             at.translate(xOffset, yOffset);
@@ -402,13 +407,20 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
             g.draw(line);
 
             // annotation
-            at.translate(
-                xOffset - Math.sin(Math.toRadians(angle - 90)) * labelWidth / 2 + 3, yOffset);
+            xOffsetOutside = Math.sin(Math.toRadians(angle - 90)) * labelWidth / 2 + 3;
+            at.translate(xOffset - xOffsetOutside, yOffset);
           }
 
           g.transform(at);
           g.fill(shape);
           g.setTransform(orig);
+
+          Icon icon = pieStyler.getInfoIcon();
+          if (isOtherLabel && icon != null) {
+            int iconX = (int) (xOffset - xOffsetOutside - icon.getIconWidth() - 2);
+            int iconY = (int) (yOffset - labelRectangle.getHeight());
+            icon.paintIcon(null, g, iconX, iconY);
+          }
         }
       }
       // else {

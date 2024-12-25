@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.knowm.xchart</groupId>
     <artifactId>xchart-parent</artifactId>
-    <version>3.8.11-SNAPSHOT</version>
+    <version>3.8.12-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>XChart Parent</name>
     <description>XChart is a light-weight Java library for plotting data.</description>
@@ -52,7 +52,7 @@
 
     <modules>
         <module>xchart</module>
-        <module>xchart-demo</module>
+        <!--<module>xchart-demo</module>-->
     </modules>
 
     <distributionManagement>

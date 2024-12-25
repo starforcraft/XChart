@@ -1,6 +1,9 @@
 package org.knowm.xchart;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import org.knowm.xchart.internal.chartpart.Chart;
 import org.knowm.xchart.internal.chartpart.Legend_Pie;
@@ -13,6 +16,7 @@ import org.knowm.xchart.style.Styler.ChartTheme;
 import org.knowm.xchart.style.theme.Theme;
 
 public class PieChart extends Chart<PieStyler, PieSeries> {
+  private final Map<String, PieSeries> otherSeriesMap = new HashMap<>();
 
   /**
    * Constructor - the default Chart Theme will be used (XChartTheme)
@@ -149,5 +153,52 @@ public class PieChart extends Chart<PieStyler, PieSeries> {
         series.setFillColor(seriesColorMarkerLineStyle.getColor());
       }
     }
+  }
+
+  @Override
+  public Map<String, PieSeries> getFilteredSeriesMap() {
+    double total =
+        seriesMap.values().stream()
+            .filter(series -> series.isEnabled() && series.getValue() != null)
+            .mapToDouble(series -> series.getValue().doubleValue())
+            .sum();
+
+    Map<String, PieSeries> filteredSeriesMap = new HashMap<>(seriesMap);
+
+    if (styler.isCombineSmallSlices()) {
+      otherSeriesMap.clear();
+
+      double otherValue = 0.0;
+
+      Iterator<Map.Entry<String, PieSeries>> iterator = filteredSeriesMap.entrySet().iterator();
+      while (iterator.hasNext()) {
+        Map.Entry<String, PieSeries> entry = iterator.next();
+        PieSeries series = entry.getValue();
+
+        if (!series.isEnabled() || series.getValue() == null) {
+          continue;
+        }
+
+        if (series.getValue().doubleValue() / total <= 0.05) {
+          otherValue += series.getValue().doubleValue();
+          otherSeriesMap.put(series.getName(), series);
+          iterator.remove();
+        }
+      }
+
+      if (otherValue > 0.0) {
+        PieSeries series = new PieSeries("Other", otherValue);
+        series.setFillColor(Color.GRAY);
+        series.setChartPieSeriesRenderStyle(styler.getDefaultSeriesRenderStyle());
+        // TODO What if the map already contains a key called 'Other'?
+        filteredSeriesMap.put("Other", series);
+      }
+    }
+
+    return filteredSeriesMap;
+  }
+
+  public Map<String, PieSeries> getOtherSeriesMap() {
+    return otherSeriesMap;
   }
 }

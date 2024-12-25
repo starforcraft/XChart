@@ -2,6 +2,7 @@ package org.knowm.xchart.style;
 
 import java.awt.Color;
 import java.awt.Font;
+import javax.swing.Icon;
 import org.knowm.xchart.PieSeries.PieSeriesRenderStyle;
 import org.knowm.xchart.style.colors.FontColorDetector;
 import org.knowm.xchart.style.theme.Theme;
@@ -29,6 +30,8 @@ public class PieStyler extends Styler {
   private boolean isLabelsFontColorAutomaticEnabled;
   private Color labelsFontColorAutomaticLight;
   private Color labelsFontColorAutomaticDark;
+  private boolean isCombineSmallSlices;
+  private Icon infoIcon;
 
   public PieStyler() {
 
@@ -356,6 +359,24 @@ public class PieStyler extends Styler {
 
   public float getSliceBorderWidth() {
     return sliceBorderWidth;
+  }
+
+  public PieStyler setCombineSmallSlices(boolean combineSmallSlices) {
+    this.isCombineSmallSlices = combineSmallSlices;
+    return this;
+  }
+
+  public boolean isCombineSmallSlices() {
+    return isCombineSmallSlices;
+  }
+
+  public PieStyler setInfoIcon(final Icon infoIcon) {
+    this.infoIcon = infoIcon;
+    return this;
+  }
+
+  public Icon getInfoIcon() {
+    return infoIcon;
   }
 
   public enum LabelType {

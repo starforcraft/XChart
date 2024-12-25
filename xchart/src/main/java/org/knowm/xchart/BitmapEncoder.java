@@ -48,7 +48,8 @@ public final class BitmapEncoder {
       fileNameWithFileExtension = fileName + newFileExtension;
     } else {
       // This is to ensure the lower-case for the extension
-      fileNameWithFileExtension = fileName.substring(0, fileName.length() - newFileExtension.length()) + newFileExtension;
+      fileNameWithFileExtension =
+          fileName.substring(0, fileName.length() - newFileExtension.length()) + newFileExtension;
     }
     return fileNameWithFileExtension;
   }
@@ -276,10 +277,14 @@ public final class BitmapEncoder {
     return getBufferedImage(chart, false);
   }
 
-  public static <T extends Chart<?, ?>> BufferedImage getBufferedImage(T chart, boolean isTranslucent) {
+  public static <T extends Chart<?, ?>> BufferedImage getBufferedImage(
+      T chart, boolean isTranslucent) {
 
     BufferedImage bufferedImage =
-        new BufferedImage(chart.getWidth(), chart.getHeight(), isTranslucent ? BufferedImage.TRANSLUCENT : BufferedImage.TYPE_INT_RGB);
+        new BufferedImage(
+            chart.getWidth(),
+            chart.getHeight(),
+            isTranslucent ? BufferedImage.TRANSLUCENT : BufferedImage.TYPE_INT_RGB);
     Graphics2D graphics2D = bufferedImage.createGraphics();
     chart.paint(graphics2D, chart.getWidth(), chart.getHeight());
     return bufferedImage;

@@ -309,4 +309,9 @@ public abstract class Chart<ST extends Styler, S extends Series> {
 
     return seriesMap;
   }
+
+  public Map<String, S> getFilteredSeriesMap() {
+
+    return seriesMap;
+  }
 }

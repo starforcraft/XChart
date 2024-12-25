@@ -214,10 +214,13 @@ public class Cursor extends MouseAdapter implements ChartPart {
         (int) (backgroundHeight));
 
     if (hasScrollPane) {
-      double additionalStartY = textHeight + LINE_SPACING;
-      double scrollPaneStartY = firstSeriesIndex * textHeight + additionalStartY;
+      double oneColumnHeight =
+          (backgroundHeight - SCROLL_PANE_PADDING * 2) / matchingDataPointList.size();
+
+      double scrollPaneStartY =
+          firstSeriesIndex * oneColumnHeight + (oneColumnHeight + LINE_SPACING);
       double scrollPaneHeightAdjustment =
-          (matchingDataPointList.size() - (firstSeriesIndex + MAX_LINES_AMOUNT)) * textHeight;
+          (matchingDataPointList.size() - (firstSeriesIndex + MAX_LINES_AMOUNT)) * oneColumnHeight;
 
       int scrollPaneX =
           (int)
