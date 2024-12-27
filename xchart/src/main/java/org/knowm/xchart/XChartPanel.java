@@ -29,6 +29,7 @@ import org.knowm.xchart.VectorGraphicsEncoder.VectorGraphicsFormat;
 import org.knowm.xchart.internal.chartpart.Chart;
 import org.knowm.xchart.internal.chartpart.ChartZoom;
 import org.knowm.xchart.internal.chartpart.Cursor;
+import org.knowm.xchart.internal.chartpart.InfoCursor;
 import org.knowm.xchart.internal.chartpart.ToolTips;
 import org.knowm.xchart.style.XYStyler;
 
@@ -82,9 +83,16 @@ public class XChartPanel<T extends Chart<?, ?>> extends JPanel {
       this.addMouseMotionListener(chartZoom); // for moving
     }
 
-    // Mouse motion listener for Cursor
+    // Mouse motion and wheel listener for Cursor
     if (chart instanceof XYChart && ((XYStyler) chart.getStyler()).isCursorEnabled()) {
       Cursor cursor = new Cursor(chart);
+      this.addMouseMotionListener(cursor);
+      this.addMouseWheelListener(cursor);
+    }
+
+    // Mouse motion and wheel listener for CursorOtherInfo
+    if (chart instanceof PieChart) {
+      InfoCursor cursor = new InfoCursor((PieChart) chart);
       this.addMouseMotionListener(cursor);
       this.addMouseWheelListener(cursor);
     }

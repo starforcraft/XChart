@@ -2,6 +2,7 @@ package org.knowm.xchart.style;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.function.Function;
 import javax.swing.Icon;
 import org.knowm.xchart.PieSeries.PieSeriesRenderStyle;
 import org.knowm.xchart.style.colors.FontColorDetector;
@@ -30,6 +31,7 @@ public class PieStyler extends Styler {
   private boolean isLabelsFontColorAutomaticEnabled;
   private Color labelsFontColorAutomaticLight;
   private Color labelsFontColorAutomaticDark;
+  private Function<Double, String> customCursorDataFormattingFunction;
   private boolean isCombineSmallSlices;
   private Icon infoIcon;
 
@@ -361,6 +363,16 @@ public class PieStyler extends Styler {
     return sliceBorderWidth;
   }
 
+  public PieStyler setCustomCursorDataFormattingFunction(
+      Function<Double, String> customCursorXDataFormattingFunction) {
+    this.customCursorDataFormattingFunction = customCursorXDataFormattingFunction;
+    return this;
+  }
+
+  public Function<Double, String> getCustomCursorDataFormattingFunction() {
+    return customCursorDataFormattingFunction;
+  }
+
   public PieStyler setCombineSmallSlices(boolean combineSmallSlices) {
     this.isCombineSmallSlices = combineSmallSlices;
     return this;
@@ -377,6 +389,21 @@ public class PieStyler extends Styler {
 
   public Icon getInfoIcon() {
     return infoIcon;
+  }
+
+  public Font getCursorFont() {
+
+    return new Font(Font.SANS_SERIF, Font.PLAIN, 16);
+  }
+
+  public Color getCursorFontColor() {
+
+    return Color.WHITE;
+  }
+
+  public Color getCursorBackgroundColor() {
+
+    return Color.GRAY;
   }
 
   public enum LabelType {

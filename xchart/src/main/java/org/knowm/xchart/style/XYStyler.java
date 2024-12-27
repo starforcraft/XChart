@@ -28,8 +28,8 @@ public class XYStyler extends AxesChartStyler {
   private Color cursorBackgroundColor;
   private Function<Double, String> customCursorXDataFormattingFunction;
   private Function<Double, String> customCursorYDataFormattingFunction;
-  private String cursorZeroString;
   private Comparator<String> cursorOrder;
+  private String cursorZeroString;
 
   /** Constructor */
   public XYStyler() {

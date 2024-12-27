@@ -1,30 +1,27 @@
 package org.knowm.xchart.internal.chartpart;
 
-import java.awt.*;
-import java.awt.event.MouseAdapter;
+import java.awt.BasicStroke;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.knowm.xchart.internal.series.MarkerSeries;
 import org.knowm.xchart.internal.series.Series;
 import org.knowm.xchart.style.XYStyler;
 
 /** Cursor movement to display matching point data information. */
-public class Cursor extends MouseAdapter implements ChartPart {
-
-  private static final int LINE_SPACING = 5;
-  private static final int MOUSE_SPACING = 15;
-  private static final int MAX_LINES_AMOUNT = 12;
-  private static final int SCROLL_PANE_WIDTH = 8;
-  private static final int SCROLL_PANE_PADDING = 2;
+public class Cursor extends AbstractCursor {
 
   private final List<DataPoint> dataPointList = new ArrayList<>();
   private final List<DataPoint> matchingDataPointList = new ArrayList<>();
@@ -33,13 +30,6 @@ public class Cursor extends MouseAdapter implements ChartPart {
   private final XYStyler styler;
 
   private final Map<String, Series> seriesMap;
-
-  private int firstSeriesIndex = 0;
-  private double mouseX;
-  private double mouseY;
-  private double startX;
-  private double startY;
-  private double textHeight;
 
   /**
    * Constructor
@@ -62,15 +52,7 @@ public class Cursor extends MouseAdapter implements ChartPart {
   private String currentHoverXValue;
 
   @Override
-  public void mouseMoved(MouseEvent e) {
-
-    //    // don't draw anything
-    //    if (!styler.isCursorEnabled() || seriesMap == null) {
-    //      return;
-    //    }
-
-    mouseX = e.getX();
-    mouseY = e.getY();
+  protected void handleMouseMoved(final MouseEvent e) {
     if (isMouseOutOfPlotContent()) {
 
       if (!matchingDataPointList.isEmpty()) {
@@ -89,34 +71,16 @@ public class Cursor extends MouseAdapter implements ChartPart {
         firstSeriesIndex = 0;
       }
     }
-
-    e.getComponent().repaint();
   }
 
   @Override
-  public void mouseWheelMoved(MouseWheelEvent e) {
-    if (e.getWheelRotation() < 0) {
-      // Mouse wheel up
-      if (firstSeriesIndex > 0) {
-        firstSeriesIndex--;
-      }
-    } else {
-      // Mouse wheel down
-      if (firstSeriesIndex + MAX_LINES_AMOUNT < matchingDataPointList.size()) {
-        firstSeriesIndex++;
-      }
-    }
-    e.getComponent().repaint();
+  protected int getMapSize() {
+    return matchingDataPointList.size();
   }
 
   private boolean isMouseOutOfPlotContent() {
 
     return !chart.plot.plotContent.getBounds().contains(mouseX, mouseY);
-  }
-
-  @Override
-  public Rectangle2D getBounds() {
-    return null;
   }
 
   @Override
@@ -192,50 +156,15 @@ public class Cursor extends MouseAdapter implements ChartPart {
     double backgroundHeight =
         textHeight * (1 + (!isZero ? size : 0)) + (2 + (!isZero ? size : 0)) * LINE_SPACING;
 
-    startX = mouseX;
-    startY = mouseY;
-    if (mouseX + MOUSE_SPACING + backgroundWidth
-        > chart.plot.plotContent.getBounds().getX()
-            + chart.plot.plotContent.getBounds().getWidth()) {
-      startX = mouseX - backgroundWidth - MOUSE_SPACING;
-    }
-
-    if (mouseY + MOUSE_SPACING + backgroundHeight
-        > chart.plot.plotContent.getBounds().getY()
-            + chart.plot.plotContent.getBounds().getHeight()) {
-      startY = mouseY - backgroundHeight - MOUSE_SPACING;
-    }
-
-    g.setColor(styler.getCursorBackgroundColor());
-    g.fillRect(
-        (int) startX + MOUSE_SPACING,
-        (int) startY + MOUSE_SPACING,
-        (int) (backgroundWidth),
-        (int) (backgroundHeight));
-
-    if (hasScrollPane) {
-      double oneColumnHeight =
-          (backgroundHeight - SCROLL_PANE_PADDING * 2) / matchingDataPointList.size();
-
-      double scrollPaneStartY =
-          firstSeriesIndex * oneColumnHeight + (oneColumnHeight + LINE_SPACING);
-      double scrollPaneHeightAdjustment =
-          (matchingDataPointList.size() - (firstSeriesIndex + MAX_LINES_AMOUNT)) * oneColumnHeight;
-
-      int scrollPaneX =
-          (int)
-              (startX + MOUSE_SPACING + backgroundWidth - SCROLL_PANE_WIDTH - SCROLL_PANE_PADDING);
-      int scrollPaneY = (int) (startY + MOUSE_SPACING + scrollPaneStartY + SCROLL_PANE_PADDING);
-      int scrollPaneHeight =
-          (int)
-              (backgroundHeight
-                  - scrollPaneStartY
-                  - scrollPaneHeightAdjustment
-                  - SCROLL_PANE_PADDING * 2);
-
-      g.setColor(Color.DARK_GRAY);
-      g.fillRect(scrollPaneX, scrollPaneY, SCROLL_PANE_WIDTH, scrollPaneHeight);
-    }
+    super.paintBackground(
+        g,
+        backgroundWidth,
+        backgroundHeight,
+        styler.getCursorBackgroundColor(),
+        hasScrollPane,
+        true,
+        matchingDataPointList.size(),
+        chart.plot.plotContent.getBounds());
   }
 
   private void paintDataPointInfo(Graphics2D g, TextLayout xValueTextLayout) {

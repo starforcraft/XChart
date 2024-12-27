@@ -18,6 +18,7 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
     extends PlotContent_<ST, S> {
 
   private final ST pieStyler;
+  InfoCursor cursor;
   private final DecimalFormat df = new DecimalFormat("0.0");
 
   /**
@@ -118,7 +119,6 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
     //    g.draw(getBounds());
 
     // get total
-    // TODO: Combine small slices into one called "other"
     double total = 0.0;
 
     Map<String, S> map = chart.getFilteredSeriesMap();
@@ -135,6 +135,10 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
     paintSlices(g, pieBounds, total, startAngle, map);
     paintLabels(g, pieBounds, total, startAngle, map);
     paintSum(g, pieBounds, total);
+
+    if (cursor != null) {
+      cursor.paint(g);
+    }
   }
 
   private void paintSlices(
@@ -199,7 +203,9 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
         // add data labels
         // maybe another option to construct this label
         // TODO use tool tip label type enum and customize this label
-        String toolTipLabel = series.getName() + " (" + df.format(y) + ")";
+        // String toolTipLabel = series.getName() + " (" + df.format(y) + ")";
+        String toolTipLabel =
+            new Formatter_Custom(pieStyler.getCustomCursorDataFormattingFunction()).format(y);
 
         double angle = (arcAngle + startAngle) - arcAngle / 2;
         double xOffset =
@@ -350,7 +356,7 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
         // System.out.println(" ================== ");
         boolean labelWillFit = false;
         double slicePercentage = y.doubleValue() / total;
-        if (slicePercentage > 0.05) {
+        if (slicePercentage > 0.02) {
           labelWillFit = true;
         } else {
           if (xDiff >= yDiff) { // Assume more vertically oriented slice
@@ -420,6 +426,10 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
             int iconX = (int) (xOffset - xOffsetOutside - icon.getIconWidth() - 2);
             int iconY = (int) (yOffset - labelRectangle.getHeight());
             icon.paintIcon(null, g, iconX, iconY);
+
+            Rectangle2D iconBounds =
+                new Rectangle(iconX, iconY, icon.getIconWidth(), icon.getIconHeight());
+            cursor.setIconBounds(iconBounds);
           }
         }
       }
@@ -467,5 +477,9 @@ public class PlotContent_Pie<ST extends PieStyler, S extends PieSeries>
       g.fill(shape);
       g.setTransform(orig);
     }
+  }
+
+  public void setCursor(InfoCursor cursor) {
+    this.cursor = cursor;
   }
 }

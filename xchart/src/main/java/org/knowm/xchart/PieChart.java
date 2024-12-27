@@ -2,9 +2,12 @@ package org.knowm.xchart;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.knowm.xchart.internal.chartpart.Chart;
 import org.knowm.xchart.internal.chartpart.Legend_Pie;
 import org.knowm.xchart.internal.chartpart.Plot_Pie;
@@ -16,7 +19,7 @@ import org.knowm.xchart.style.Styler.ChartTheme;
 import org.knowm.xchart.style.theme.Theme;
 
 public class PieChart extends Chart<PieStyler, PieSeries> {
-  private final Map<String, PieSeries> otherSeriesMap = new HashMap<>();
+  private final LinkedHashMap<String, PieSeries> otherSeriesMap = new LinkedHashMap<>();
 
   /**
    * Constructor - the default Chart Theme will be used (XChartTheme)
@@ -167,7 +170,6 @@ public class PieChart extends Chart<PieStyler, PieSeries> {
 
     if (styler.isCombineSmallSlices()) {
       otherSeriesMap.clear();
-
       double otherValue = 0.0;
 
       Iterator<Map.Entry<String, PieSeries>> iterator = filteredSeriesMap.entrySet().iterator();
@@ -179,26 +181,40 @@ public class PieChart extends Chart<PieStyler, PieSeries> {
           continue;
         }
 
-        if (series.getValue().doubleValue() / total <= 0.05) {
+        if (series.getValue().doubleValue() / total <= 0.02) {
           otherValue += series.getValue().doubleValue();
           otherSeriesMap.put(series.getName(), series);
           iterator.remove();
         }
       }
 
+      LinkedHashMap<String, PieSeries> sortedOtherSeriesMap =
+          otherSeriesMap.entrySet().stream()
+              .sorted(
+                  Map.Entry.comparingByValue(
+                      Comparator.comparing((PieSeries s) -> s.getValue().doubleValue())
+                          .reversed()
+                          .thenComparing(Series::getName, Comparator.naturalOrder())))
+              .collect(
+                  Collectors.toMap(
+                      Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
+      otherSeriesMap.clear();
+      otherSeriesMap.putAll(sortedOtherSeriesMap);
+
       if (otherValue > 0.0) {
-        PieSeries series = new PieSeries("Other", otherValue);
-        series.setFillColor(Color.GRAY);
-        series.setChartPieSeriesRenderStyle(styler.getDefaultSeriesRenderStyle());
+        PieSeries otherSeries = new PieSeries("Other", otherValue);
+        otherSeries.setFillColor(Color.GRAY);
+        otherSeries.setChartPieSeriesRenderStyle(styler.getDefaultSeriesRenderStyle());
         // TODO What if the map already contains a key called 'Other'?
-        filteredSeriesMap.put("Other", series);
+        filteredSeriesMap.put("Other", otherSeries);
       }
     }
 
     return filteredSeriesMap;
   }
 
-  public Map<String, PieSeries> getOtherSeriesMap() {
+  public LinkedHashMap<String, PieSeries> getOtherSeriesMap() {
     return otherSeriesMap;
   }
 }
